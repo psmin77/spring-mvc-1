@@ -1,5 +1,7 @@
+### 스프링 MVC 1 - 김영한, 인프런
+
 ![](https://velog.velcdn.com/images/psmin77/post/f76e7aaa-d5b6-4377-b8f1-4e4851474332/image.png)
-#### 스프링 MVC 1 - 김영한, 인프런
+
 - 웹 애플리케이션 이해
   - 웹 서버, 웹 애플리케이션 서버
   - 서블릿
