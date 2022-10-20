@@ -80,6 +80,42 @@ public class HelloServlet extends HttpServlet {
 - WAS는 멀티 쓰레드를 지원함
 - 싱글 쓰레드 프로그래밍처럼 개발해도 되지만,
 실질적으로 멀티 쓰레드 환경이므로 싱글톤 객체(서블릿, 스프링 빈)는 주의해서 사용
+
+### HTML
+- 정적 리소스
+	- 고정된 HTML 파일, CSS, JS, 이미지, 영상 등을 제공
+	- 주로 웹 브라우저
+- HTML 페이지
+	- 동적으로 HTML 파일을 생성해서 전달(JSP, 타임리프)
+    - 웹 브라우저: HTML 해석
+
+### HTML API
+- HTML이 아닌 데이터만 주고 받으며 UI화면은 클라이언트가 별도 처리
+- 주로 JSON형식로 다양한 시스템에서 통신
+  - 앱 클라이언트(아이폰, 안드로이드, PC 앱)
+  - 웹 브라우저에서 자바스크립트를 통한 호출
+  - 웹 클라이언트(React, Vue.js)
+  - 서버 to 서버
+    
+### SSR / CSR
+#### 서버 사이드 렌더링(SSR)![](https://velog.velcdn.com/images/psmin77/post/9d2f5d3d-1cfc-4d79-9fa6-9726085298b2/image.png)
+- 서버에서 최종 HTML 결과를 생성하여 웹 브라우저로 전달
+- 주로 정적인 화면 사용
+- JSP, 타임리프 -> 백엔드 개발자
+
+#### 클라이언트 사이드 렌더링(CSR)![](https://velog.velcdn.com/images/psmin77/post/f744e931-7ee1-4f1a-bfd8-06fa92f25af0/image.png)
+- HTML 결과를 자바스크립트를 통해 웹 브라우저에서 생성
+- 주로 동적인 화면 사용
+- React, Vue.js -> 웹 프론트엔드 개발자
+
+=> 반드시 양분화하여 나누는 것이 아니라, 적절히 조합하여 활용
+
+### 자바 웹 기술 역사
+- 서블릿(1997) -> JSP(1999) -> 서블릿, JSP 조합 MVC 패턴 -> MVC 프레임워크(2000~2010)
+- (현재) 애노테이션 기반 Web Servlet - Spring MVC
+  - 빌드 배포를 단순화 시킨 스프링 부트까지 사용
+  - 스프링 MVC + 타임리프(Thymeleaf) => 최선의 조합
+  
 <br>
 
 >
