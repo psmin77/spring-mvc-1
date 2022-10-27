@@ -51,12 +51,20 @@ public void render(HttpServletRequest request, HttpServletResponse response) thr
 ~~~
 <br>
 
-#### Model 추가(v3)![](https://velog.velcdn.com/images/psmin77/post/69fd1b9f-6957-4f46-b07c-e6282f44bf42/image.png)
+#### Model 추가(v3)
 - 서블릿 종속성 제거
   - 컨트롤러가 서블릿 기술을 전혀 사용하지 않도록 함
 - 뷰 이름 중복 제거
   - 중복되는 이름을 로직으로 단순화
   - (ex) /WEB-INF/views/new-form.jsp -> new-form
+  
+![](https://velog.velcdn.com/images/psmin77/post/69fd1b9f-6957-4f46-b07c-e6282f44bf42/image.png)
+- v3 구조
+  - 컨트롤러 경로 조회 : v1,2와 동일
+  - controller.process() : 해당 컨트롤러 실행
+  - return ModelView : 로직 실행 후 모델 객체 반환
+  - viewResolver : 논리 뷰 -> 물리 뷰 (단순화)
+  - view.render()
 - ModelView 객체: 뷰 이름, model 객체(map)
 ~~~ java
 (회원가입 컨트롤러)
@@ -67,8 +75,8 @@ ModelView mv = new ModelView("save-result");
 // 회원가입 완료된 member 객체 전달
 mv.getModel().put("member", member); 
 ~~~
-- 각각의 컨트롤러에서 ModelView 객체를 생성하며 논리 뷰 이름(new-form, save-result 등)을 전달
-- 뷰에서 필요한 객체 정보를 모델에 담아서 전달
+- 각각의 컨트롤러에서 ModelView 객체 생성
+- 논리 뷰 이름(new-form, save-result 등)과 객체 정보 등을 모델에 담아서 전달
 - 프론트 컨트롤러(Front Controller V3)
 ~~~ java
 @Override
@@ -77,7 +85,7 @@ response) throws ServletException, IOException {
      
     (컨트롤러 조회- v1,v2 동일)
    
-    // HttpServletRequest의 모든 파라미터 정보를 꺼내서 map으로 변환하고 
+    // HttpServletRequest의 파라미터 정보를 map으로 변환
     // 해당 컨트롤러 호출
     Map<String, String> paramMap = createParamMap(request);
     ModelView mv = controller.process(paramMap);
@@ -107,7 +115,7 @@ private MyView viewResolver(String viewName) {
 ~~~ java
 public void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     
-    // 모델의 데이터를 꺼내서 서블릿 setAttribute로 담아두기
+    // 모델의 데이터를 꺼내서 setAttribute로 담아두기
     modelToRequestAttribute(model, request);
     
     // 해당 경로로 이동
