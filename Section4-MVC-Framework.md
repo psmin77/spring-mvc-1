@@ -9,7 +9,7 @@ cf. 스프링 웹 MVC의 DispatcherServlet이 프론트 컨트롤러 패턴으�
 #### 프론트 컨트롤러 도입(v1)
 - urlPatterns = "/front-controller/v1/*"
   - /front-controller/v1/ 으로 시작하는 모든 요청을 받음
-- controllerMap
+- _FrontController.controllerMap_
   
 ~~~ java
 public FrontControllerServletV1() {
@@ -19,7 +19,7 @@ public FrontControllerServletV1() {
     controllerMap.put("/front-controller/v1/members", new MemberListControllerV1());
 }
 ~~~
-- service()
+- _FrontControllerV1.service()_
 ~~~ java
 @Override
 protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,8 +40,9 @@ protected void service(HttpServletRequest request, HttpServletResponse response)
 <br>
 
 #### View 분리(v2)
-- 컨트롤러에서 뷰로 이동하는 중복 코드를 별도 처리하는 객체
+- 컨트롤러에서 뷰로 이동하는 중복 코드를 별도 처리하는 객체 생성
 - 프론트 컨트롤러에서 컨트롤러 호출 -> 컨트롤러는 뷰 객체 반환 -> view.render() 실행
+- _View.render()_
 ~~~java
 public void render(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     // 전달받은 URI 경로로 Dispatcher 서블릿을 호출하는 메소드 
@@ -66,24 +67,19 @@ public void render(HttpServletRequest request, HttpServletResponse response) thr
   - viewResolver : 논리 뷰 -> 물리 뷰 (단순화)
   - view.render()
 - ModelView 객체: 뷰 이름, model 객체(map)
+- _Controller.process()_
 ~~~ java
-(회원가입 컨트롤러)
-...
-// 완료 후 이동할 경로 (논리 뷰 이름 전달)
+// 각 컨트롤러에서 ModelView 객체 생성
+// 논리 뷰 이름과 객체 정보 등을 모델에 담아서 전달
 ModelView mv = new ModelView("save-result");
-
-// 회원가입 완료된 member 객체 전달
 mv.getModel().put("member", member); 
 ~~~
-- 각각의 컨트롤러에서 ModelView 객체 생성
-- 논리 뷰 이름(new-form, save-result 등)과 객체 정보 등을 모델에 담아서 전달
-- 프론트 컨트롤러(Front Controller V3)
+- _FrontControllerV3_
 ~~~ java
 @Override
 protected void service(HttpServletRequest request, HttpServletResponse
 response) throws ServletException, IOException {
-     
-    (컨트롤러 조회- v1,v2 동일)
+     (컨트롤러 조회- v1,v2 동일)
    
     // HttpServletRequest의 파라미터 정보를 map으로 변환
     // 해당 컨트롤러 호출
@@ -111,7 +107,7 @@ private MyView viewResolver(String viewName) {
           return new MyView("/WEB-INF/views/" + viewName + ".jsp");
 }
 ~~~
-- 뷰 객체(MyView)
+- _View.render()_
 ~~~ java
 public void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     
@@ -126,6 +122,33 @@ public void render(Map<String, Object> model, HttpServletRequest request, HttpSe
 private void modelToRequestAttribute(Map<String, Object> model, HttpServletRequest request) {
     model.forEach((key, value) -> request.setAttribute(key, value));
 }
+~~~
+<br>
+
+#### 단순/실용 컨트롤러(v4)
+- 기본 구조는 v3 동일, 컨트롤러에서 ViewName만 반환
+(ModelView 사용하지 않음)
+- _Controller.process()_
+~~~ java
+@Override
+public String process(Map<String, String> paramMap, Map<String, Object> model) {
+    (컨트롤러 로직)
+    ...
+    // 전달받은 모델 객체(map)에 데이터를 담고, 논리 뷰 이름만 리턴
+    model.put("member", member);
+    return "save-result";
+}
+~~~
+- _FrontControllerV4_
+~~~ java
+(v3와 동일)
+...
+// 프론트 컨트롤러에서 모델 객체(map) 생성하여 각 컨트롤러에 전달
+Map<String, Object> model = new HashMap<>();
+String viewName = controller.process(paramMap, model);
+
+MyView view = viewResolver(viewName);
+view.render(model, request, response);
 ~~~
 
 
