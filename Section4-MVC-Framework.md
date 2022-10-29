@@ -162,6 +162,7 @@ view.render(model, request, response);
 - 핸들러: 컨트롤러의 이름을 더 넓은 범위로 변경
 - _ControllerHandlerAdapter(v3/v4)_
 ~~~ java
+// 사용할 컨트롤러마다 각각 생성
 public class ControllerHandlerAdapter {
 
     // 해당 핸들러(=컨트롤러)를 사용할 수 있는지 판단하는 메서드
@@ -204,8 +205,7 @@ public FrontControllerServletV5() {
 }
 
 private void initHandlerMappingMap() {
-    handlerMappingMap.put("/front-controller/v5/v*/members/new-form", new
-MemberFormControllerV3());
+    handlerMappingMap.put("/front-controller/v5/v*/members/new-form", new MemberFormControllerV*());
     ...
 }
 
