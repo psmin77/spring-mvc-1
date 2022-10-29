@@ -150,6 +150,108 @@ String viewName = controller.process(paramMap, model);
 MyView view = viewResolver(viewName);
 view.render(model, request, response);
 ~~~
+<br>
+
+#### 유연한 컨트롤러(v5)
+- 어댑터 패턴(Adapter)
+  - 다양한 방식의 컨트롤러를 처리할 수 있음
+  - 어댑터를 통해 프레임워크를 유연하고 확장성 있게 설계
+  
+![](https://velog.velcdn.com/images/psmin77/post/a3d22d55-4f1e-428a-879f-3e98d56d7901/image.png)
+- 핸들러 어댑터: 다양한 종류의 컨트롤러를 호환할 수 있도록 하는 어댑터 역할
+- 핸들러: 컨트롤러의 이름을 더 넓은 범위로 변경
+- _ControllerHandlerAdapter(v3/v4)_
+~~~ java
+public class ControllerHandlerAdapter {
+
+    // 해당 핸들러(=컨트롤러)를 사용할 수 있는지 판단하는 메서드
+    @Override
+    public boolean supports(Object handler) {
+        return (handler instanceof ControllerV*);
+    }
+      
+    @Override
+    ModelView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws ServletException, IOException {
+        // 핸들러를 컨트롤러로 캐스팅
+        ControllerV* controller = (ControllerV*)handler;
+        Map<String, String> paramMap = createParamMap(request);
+        
+        // 어댑터를 통해 컨트롤러 호출 후 ModelView 리턴
+        // v3
+        ModelView mv = controller.process(paramMap);
+        
+        // v4
+        // 뷰 이름을 반환하는 v4에서는 어댑터가 직접 ModelView 객체 생성하여 타입에 맞게 리턴해줌
+        HashMap<String, Object> model = new HashMap<>();
+        String viewName = controller.process(paramMap, model);
+        
+        ModelView mv = new ModelView(viewName);
+        mv.setModel(model);
+        
+        return mv; 
+    }
+} 
+~~~
+- _FrontControllerV5_
+~~~ java
+// 어댑터로 호환할 수 있는 모든 컨트롤러 매핑 경로와 어댑터를 생성자로 초기화(등록)
+private final Map<String, Object> handlerMappingMap = new HashMap<>();
+private final List<MyHandlerAdapter> handlerAdapters = new ArrayList<>();
+
+public FrontControllerServletV5() {
+    initHandlerMappingMap();
+    initHandlerAdapters();
+}
+
+private void initHandlerMappingMap() {
+    handlerMappingMap.put("/front-controller/v5/v*/members/new-form", new
+MemberFormControllerV3());
+    ...
+}
+
+private void initHandlerAdapters() {
+    handlerAdapters.add(new ControllerV*HandlerAdapter());
+    ...
+}
+~~~
+
+~~~ java
+@Override
+protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    // 핸들러(컨트롤러) 조회, 없으면 404
+    Object handler = getHandler(request);
+    if (handler == null) { 
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        return; 
+    }
+    
+    // 어댑터 조회
+    MyHandlerAdapter adapter = getHandlerAdapter(handler);
+    
+    // 어댑터 호출
+    ModelView mv = adapter.handle(request, response, handler);
+    
+    // 뷰 실행
+    MyView view = viewResolver(mv.getViewName());
+    view.render(mv.getModel(), request, response);
+}
+
+private Object getHandler(HttpServletRequest request) {
+    String requestURI = request.getRequestURI();
+    return handlerMappingMap.get(requestURI);
+}
+
+private MyHandlerAdapter getHandlerAdapter(Object handler) {
+    for (MyHandlerAdapter adapter : handlerAdapters) {
+        if (adapter.supports(handler)) {
+            return adapter;
+        }
+    }
+    throw new IllegalArgumentException("handler adapter를 찾을 수 없습니다. handler=" + handler);
+}
+
+~~~
 
 
 <br>
