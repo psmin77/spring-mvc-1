@@ -5,6 +5,7 @@
 - 다른 컨트롤러는 서블릿을 사용하지 않아도 됨
 
 cf. 스프링 웹 MVC의 DispatcherServlet이 프론트 컨트롤러 패턴으로 구현됨
+<br>
 
 #### 프론트 컨트롤러 도입(v1)
 - urlPatterns = "/front-controller/v1/*"
@@ -163,7 +164,7 @@ view.render(model, request, response);
 - _ControllerHandlerAdapter(v3/v4)_
 ~~~ java
 // 사용할 컨트롤러마다 각각 생성
-public class ControllerHandlerAdapter {
+public class ControllerHandlerAdapter implements HandlerAdapter {
 
     // 해당 핸들러(=컨트롤러)를 사용할 수 있는지 판단하는 메서드
     @Override
@@ -252,8 +253,6 @@ private MyHandlerAdapter getHandlerAdapter(Object handler) {
 }
 
 ~~~
-
-
 <br>
 
 >
