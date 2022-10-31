@@ -12,6 +12,7 @@
   - ModelAndView 반환
   - viewResolver 호출
     - JSP에서는 InternalResourceViewResolver
+    - Thymeleaf에서는 ThymeleafResolver
   - View 반환
     - JSP에서는 InternalResourceView(JstlView) 반환
   - 뷰 렌더링
@@ -29,7 +30,7 @@
   - 1 = HttpRequestHandlerAdapter 
     - HttpRequestHandler 처리
   - 2 = SimpleControllerHandlerAdapter
-    - Controller 인터페이스 처리 (애노테이션 X, 과거 사용)
+    - Controller 인터페이스 처리 (애노테이션X, 과거 사용)
 - 현재 실무에서는 대부분 애노테이션 기반으로 사용
 <br>
 
@@ -47,13 +48,24 @@ spring.mvc.view.suffix=.jsp
  - 동작 순서
    - 뷰 리졸버 호출
    - InternalResourceViewResolver
-     - Thymeleaf 뷰 템플릿을 사용하면 라이브러리를 통해 ThymeleafResolver를 등록
    - InternalResourceView.forward()
-     - JSTL 라이브러리가 있으면 JstlView 반환
    - view.render()
 <br>
 
 ### 스프링 MVC 시작하기
+- @RequestMapping 
+  - 요청 정보를 매핑, 실무에서 가장 많이 사용하는 방식
+  - 클래스/메소드 단위 모두 매핑 가능
+    - 클래스 단위(중복 경로) + 메소드 단위 조합 가능
+    - (ex) "/springmvc/v1/" + "/save", "/list"
+  - @GetMapping("경로"), @PostMapping("경로")
+  - @RequestParam("name") == request.getParameter("name")
+- @Controller 
+  - 스프링이 자동으로 스프링 빈 등록 
+  (컴포넌트 스캔의 대상이 됨)
+- ModelAndView
+  - 모델과 뷰 정보를 담아서 반환
+  - addObject("name", value)
 
 <br>
 
