@@ -73,9 +73,65 @@
 - @CookieValue(value="value", required=false/true) String cookie : 특정 쿠키 조회
 
 ### HTTP 요청 파라미터 - 쿼리 파라미터, HTML Form
+#### HTTP 요청 데이터 조회
 - GET : 쿼리 파라미터
 - POST : HTML Form
 - HTTP message body 
+
+#### 요청 파라미터 - 쿼리 파라미터, HTML Form
+- request.getParameter()
+  - HttpServletRequest가 제공하는 요청 파라미터 조회
+- HTML Form - submit
+  - Form에 입력한 정보를 쿼리 파라미터 형식으로 전송
+  
+#### 요청 파라미터 - @RequestParam
+~~~ java
+@ResponseBody
+@RequestMapping("/request-param")
+public String requestParam(
+        @RequestParam("parameterName1") String username,
+        @RequestParam("parameterName2") int age) {
+        
+    log.info("username={}, age={}", username, age);
+    return "ok";
+}
+~~~
+- @ResponseBody : HTTP message body에 내용 입력
+  - 개별 메소드 단위 설정
+  - @Restcontroller : 클래스 단위 설정 
+  = @Controller + @ResponseBody
+<br>
+- @RequestParam : 파라미터 이름으로 바인딩
+  - @RequestParam("파라미터 이름") String 변수 이름 
+  == request.getParameter("파라미터 이름")
+  - HTTP 파라미터 이름이 변수 이름과 같으면 생략 가능
+  => @RequestParam String username
+  - String, int 등 단순 타입이면 애노테이션도 생략 가능, 권장X
+  => String username, int age 
+<br>  
+- @RequestParam.required : 파라미터 필수 여부
+  - 기본값 true(필수)
+  - 기본형(primitive type) NULL 주의
+  -> int는 Integer로 받거나 defaultValue 설정
+- @RequestParam.defaultValue : 파라미터 값이 없는 경우 기본값 설정
+- @RequestParam.map
+  - Map(key=value)
+  - MultiValueMap(key=[value1, value2 ...])
+  하나의 파라미터 이름에 여러 개의 값 가능
+
+#### 요청 파라미터 - @ModelAttribute
+~~~java
+@ResponseBody
+@RequestMapping("/model-attribute")
+public String modelAttributeV1(@ModelAttribute HelloData helloData) {
+    log.info("username={}, age={}", helloData.getUsername(), helloData.getAge());
+    return "ok";
+}
+~~~
+- @ModelAttribute 
+  - 객체 생성 후 요청 파라미터의 이름으로 객체의 프로퍼티(Getter/Setter)를 찾아 setter 호출하여 값을 입력(바인딩)
+  - 애노테이션 생략 가능
+
 <br>
 
 >
