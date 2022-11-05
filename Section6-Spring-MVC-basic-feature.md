@@ -99,20 +99,17 @@ public String requestParam(
 - @ResponseBody : HTTP message body에 내용 입력
   - 개별 메소드 단위 설정
   - @Restcontroller : 클래스 단위 설정 
-  = @Controller + @ResponseBody
-<br>
+  - @Controller + @ResponseBody
+
 - @RequestParam : 파라미터 이름으로 바인딩
-  - @RequestParam("파라미터 이름") String 변수 이름 
-  == request.getParameter("파라미터 이름")
-  - HTTP 파라미터 이름이 변수 이름과 같으면 생략 가능
-  => @RequestParam String username
-  - String, int 등 단순 타입이면 애노테이션도 생략 가능, 권장X
-  => String username, int age 
-<br>  
+  - @RequestParam("파라미터 이름") String 변수 이름 == request.getParameter("파라미터 이름")
+  - HTTP 파라미터 이름이 변수 이름과 같으면 생략 가능 => @RequestParam String username
+  - String, int 등 단순 타입이면 애노테이션도 생략 가능, 권장X => String username, int age 
+
 - @RequestParam.required : 파라미터 필수 여부
   - 기본값 true(필수)
   - 기본형(primitive type) NULL 주의
-  -> int는 Integer로 받거나 defaultValue 설정
+    - int는 Integer로 받거나 defaultValue 설정
 - @RequestParam.defaultValue : 파라미터 값이 없는 경우 기본값 설정
 - @RequestParam.map
   - Map(key=value)
