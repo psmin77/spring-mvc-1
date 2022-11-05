@@ -1,6 +1,6 @@
 ### 요청매핑
 - @RestController
-  - 반환 값으로 뷰가 아니라 HTTP 메시지 바디에 바로 입력
+  - 뷰 조회가 아닌 HTTP 메시지 바디에 바로 반환 값을 입력
 - @RequestMapping("/매핑경로")
   - 매핑 경로는 배열[]로 다중 설정 가능
   ({"/mapping1", "/mapping2"})
@@ -45,15 +45,15 @@
 - @PostMapping(value = "/mapping-consume", consumes = "application/json")
   - consumes="application/json", "text/plain" 등
   - consumes={"application/*", "text/plain"} -> 다중 설정
-  - MediaType.APPLICATION_JSON_VALUE
+  - consumes= MediaType.APPLICATION_JSON_VALUE
 
 #### 미디어 타입 조건 매핑 (produre)
 - HTTP 요청의 Accept 헤더 기반으로 수신할 미디어 타입 매핑
 - 맞지 않으면 HTTP 406 상태코드 반환
 - @PostMapping(value = "/mapping-produce", produces = "text/html")
-- produces = "text/plain"
-- produces = {"text/plain", "application/*"}
-- produces = MediaType.TEXT_PLAIN_VALUE
+  - produces = "text/plain"
+  - produces = {"text/plain", "application/*"}
+  - produces = MediaType.TEXT_PLAIN_VALUE
 
 ### 요청 매핑 - API 예시
 - 회원 관리 API
@@ -78,13 +78,13 @@
 - POST : HTML Form
 - HTTP message body 
 
-#### 요청 파라미터 - 쿼리 파라미터, HTML Form
+#### HTTP 요청 파라미터 - 쿼리 파라미터, HTML Form
 - request.getParameter()
   - HttpServletRequest가 제공하는 요청 파라미터 조회
 - HTML Form - submit
   - Form에 입력한 정보를 쿼리 파라미터 형식으로 전송
   
-#### 요청 파라미터 - @RequestParam
+#### HTTP 요청 파라미터 - @RequestParam
 ~~~ java
 @ResponseBody
 @RequestMapping("/request-param")
@@ -119,7 +119,7 @@ public String requestParam(
   - MultiValueMap(key=[value1, value2 ...])
   하나의 파라미터 이름에 여러 개의 값 가능
 
-#### 요청 파라미터 - @ModelAttribute
+#### HTTP 요청 파라미터 - @ModelAttribute
 ~~~java
 @ResponseBody
 @RequestMapping("/model-attribute")
@@ -131,6 +131,76 @@ public String modelAttributeV1(@ModelAttribute HelloData helloData) {
 - @ModelAttribute 
   - 객체 생성 후 요청 파라미터의 이름으로 객체의 프로퍼티(Getter/Setter)를 찾아 setter 호출하여 값을 입력(바인딩)
   - 애노테이션 생략 가능
+
+#### HTTP 요청 메시지 - 단순 텍스트
+- HTTP 메시지 바디를 통해 데이터가 직접 넘어오는 경우에는 @RequestParam, @ModelAttribute를 사용할 수 없음
+(HTML Form 형식은 요청 파라미터로 받음)
+
+##### InputStream
+~~~ java
+ServletInputStream inputStream = request.getInputStream();
+String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+~~~
+- InputStream: HTTP 메시지 바디 데이터를 직접 조회
+
+
+##### Input/Ouput Stream
+~~~ java
+public void requestBodyStringV2(InputStream inputStream, Writer responseWriter) throws IOException {
+    String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+    responseWriter.write("ok");
+}
+~~~
+- InputStream(Reader): HTTP 요청 메시지 바디의 내용을 직접 조회
+- OutputStream(Writer): HTTP 응답 메시지의 바디에 직접 결과 출력
+
+##### HttpEntity
+~~~ java
+public HttpEntity<String> requestBodyStringV3(HttpEntity<String> httpEntity){
+    String messageBody = httpEntity.getBody();
+    log.info("messageBody={}", messageBody);
+    return new HttpEntity<>("ok");
+}
+~~~
+- HttpEntity: HTTP header, body 정보를 편리하게 조회
+  - 메시지 바디를 직접 조회
+    - HttpMessageConverter -> StringHttpMessageConverter 적용
+  - 응답도 가능, 메시지 바디 정보를 직접 반환(view 조회X)
+    - HttpMessageConverter -> StringHttpMessageConverter 적용
+  - RequestEntity : HTTP 메소드, url 정보 추가, 요청 사용
+  - ResponseEntity : HTTP 상태코드 설정 가능, 응답 사용
+##### @RequestBody
+~~~ java
+@ResponseBody
+@PostMapping("/request-body-string-v4")
+public String requestBodyStringV4(@RequestBody String messageBody) {
+    log.info("messageBody={}", messageBody);
+    return "ok";
+}
+~~~
+- @RequestBody 
+  - 메시지 바디 정보를 직접 조회(@RequestParam, @ModelAttribute X)
+- @ResponseBody
+  - 메시지 바디 정보를 직접 반환(view 조회 X)
+
+#### HTTP 요청 메시지 - JSON
+- HTTP API 전송 방식에서 주로 사용하는 JSON
+  - {"name1":"value1", "name2":"value2"} 형식
+  - content-type: application/json
+  ~~~java
+  HelloData data = objectMapper.readValue(messageBody, HelloData.class);
+  ~~~
+  - 문자로 된 데이터를 objectMapper 사용하여 자바 객체로 변환할 수 있음
+
+##### @RequestBody 객체 파라미터
+~~~ java
+public String requestBodyJson(@RequestBody HelloData data)
+~~~
+- @RequestBody를 파라미터에 직접 객체로 지정할 수 있음
+- ! HTTP 요청 시 content-type:application/json 확인해야 함 
+  - HttpMessageConverter 사용 -> MappingJackson2HttpMessageConverter 변환
+- @RequestBody는 생략 불가능, 생략 시 @RequesParam 또는 @ModelAttribute로 적용하여 요청파라미터로 처리함
+- JSON 형식으로 응답도 가능
 
 <br>
 
