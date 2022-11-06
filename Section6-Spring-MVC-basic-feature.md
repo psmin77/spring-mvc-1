@@ -100,7 +100,7 @@ public String requestParam(
   - 개별 메소드 단위 설정
   - @Restcontroller : 클래스 단위 설정 
   - @Controller + @ResponseBody
-
+  
 - @RequestParam : 파라미터 이름으로 바인딩
   - @RequestParam("파라미터 이름") String 변수 이름 == request.getParameter("파라미터 이름")
   - HTTP 파라미터 이름이 변수 이름과 같으면 생략 가능 => @RequestParam String username
@@ -198,6 +198,39 @@ public String requestBodyJson(@RequestBody HelloData data)
   - HttpMessageConverter 사용 -> MappingJackson2HttpMessageConverter 변환
 - @RequestBody는 생략 불가능, 생략 시 @RequesParam 또는 @ModelAttribute로 적용하여 요청파라미터로 처리함
 - JSON 형식으로 응답도 가능
+
+### HTTP 응답 - 정적 리소스, 뷰 템플릿
+#### 정적 리소스
+- 웹 브라우저에 HTML, css, js로 제공하는 정적 리소스
+- 정적 리소스는 해당 파일을 변경 없이 그대로 서비스
+- 스프링 부트의 정적 리소스 경로
+  - /src/main/resources/static
+    
+#### 뷰 템플릿
+- 웹 브라우저에 동적인 HTML을 제공하는 뷰 템플릿
+- JSP, Thymeleaf 등 템플릿 엔진을 통해 서비스
+- 스프링 부트의 뷰 템플릿 경로
+  - /src/main/resources/templates
+~~~java
+@RequestMapping("/response-view-v1")
+public ModelAndView responseViewV1() {
+    ModelAndView mav = new ModelAndView("response/hello")
+                             .addObject("data", "hello!");
+   return mav; 
+}
+
+@RequestMapping("/response-view-v2")
+public String responseViewV2(Model model) {
+    model.addAttribute("data", "hello!!");
+    return "response/hello";
+}
+~~~
+- String 반환: 뷰 리졸버를 실행하여 String 이름의 뷰를 찾고 렌더링
+- void 사용: 요청 URL을 참고하여 동일한 경로의 뷰 이름 실행, 권장X
+
+#### HTTP 메시지
+  - HTTP API 제공하는 경우 HTTP 메시지 바디에 JSON 등의 형식으로 전송
+
 
 <br>
 
