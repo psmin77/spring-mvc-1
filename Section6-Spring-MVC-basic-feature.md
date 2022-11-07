@@ -1,6 +1,8 @@
 ### 요청매핑
 - @RestController
   - 뷰 조회가 아닌 HTTP 메시지 바디에 바로 반환 값을 입력
+  - 클래스 단위 설정
+  - @Controller + @ResponseBody(메소드 단위 설정)
 - @RequestMapping("/매핑경로")
   - 매핑 경로는 배열[]로 다중 설정 가능
   ({"/mapping1", "/mapping2"})
@@ -72,19 +74,21 @@
 - @RequestHeader("host") String host : 특정 헤더 조회
 - @CookieValue(value="value", required=false/true) String cookie : 특정 쿠키 조회
 
-### HTTP 요청 파라미터 - 쿼리 파라미터, HTML Form
+### HTTP 요청 파라미터
 #### HTTP 요청 데이터 조회
 - GET : 쿼리 파라미터
 - POST : HTML Form
 - HTTP message body 
 
-#### HTTP 요청 파라미터 - 쿼리 파라미터, HTML Form
+#### 쿼리 파라미터
 - request.getParameter()
-  - HttpServletRequest가 제공하는 요청 파라미터 조회
+- HttpServletRequest가 제공하는 요청 파라미터 조회
+
+#### HTML Form
 - HTML Form - submit
-  - Form에 입력한 정보를 쿼리 파라미터 형식으로 전송
+- Form에 입력한 정보를 쿼리 파라미터 형식으로 전송
   
-#### HTTP 요청 파라미터 - @RequestParam
+#### @RequestParam
 ~~~ java
 @ResponseBody
 @RequestMapping("/request-param")
@@ -97,14 +101,14 @@ public String requestParam(
 }
 ~~~
 - @ResponseBody : HTTP message body에 내용 입력
-  - 개별 메소드 단위 설정
-  - @Restcontroller : 클래스 단위 설정 
-  - @Controller + @ResponseBody
-  
+
 - @RequestParam : 파라미터 이름으로 바인딩
-  - @RequestParam("파라미터 이름") String 변수 이름 == request.getParameter("파라미터 이름")
-  - HTTP 파라미터 이름이 변수 이름과 같으면 생략 가능 => @RequestParam String username
-  - String, int 등 단순 타입이면 애노테이션도 생략 가능, 권장X => String username, int age 
+  - @RequestParam("파라미터 이름") String 변수 이름 
+  == request.getParameter("파라미터 이름")
+  - HTTP 파라미터 이름이 변수 이름과 같으면 생략 가능 
+  => @RequestParam String username
+  - String, int 등 단순 타입이면 애노테이션도 생략 가능, 권장X 
+  => String username, int age 
 
 - @RequestParam.required : 파라미터 필수 여부
   - 기본값 true(필수)
@@ -116,7 +120,7 @@ public String requestParam(
   - MultiValueMap(key=[value1, value2 ...])
   하나의 파라미터 이름에 여러 개의 값 가능
 
-#### HTTP 요청 파라미터 - @ModelAttribute
+#### @ModelAttribute
 ~~~java
 @ResponseBody
 @RequestMapping("/model-attribute")
@@ -125,9 +129,8 @@ public String modelAttributeV1(@ModelAttribute HelloData helloData) {
     return "ok";
 }
 ~~~
-- @ModelAttribute 
-  - 객체 생성 후 요청 파라미터의 이름으로 객체의 프로퍼티(Getter/Setter)를 찾아 setter 호출하여 값을 입력(바인딩)
-  - 애노테이션 생략 가능
+- 객체 생성 후 요청 파라미터 이름으로 객체의 프로퍼티(Getter/Setter)를 찾아 setter 호출하여 값을 입력(바인딩)
+- 애노테이션 생략 가능
 
 #### HTTP 요청 메시지 - 단순 텍스트
 - HTTP 메시지 바디를 통해 데이터가 직접 넘어오는 경우에는 @RequestParam, @ModelAttribute를 사용할 수 없음
@@ -187,7 +190,7 @@ public String requestBodyStringV4(@RequestBody String messageBody) {
   ~~~java
   HelloData data = objectMapper.readValue(messageBody, HelloData.class);
   ~~~
-  - 문자로 된 데이터를 objectMapper 사용하여 자바 객체로 변환할 수 있음
+  - 문자로 된 데이터를 objectMapper 사용하여 자바 객체로 변환
 
 ##### @RequestBody 객체 파라미터
 ~~~ java
@@ -199,7 +202,7 @@ public String requestBodyJson(@RequestBody HelloData data)
 - @RequestBody는 생략 불가능, 생략 시 @RequesParam 또는 @ModelAttribute로 적용하여 요청파라미터로 처리함
 - JSON 형식으로 응답도 가능
 
-### HTTP 응답 - 정적 리소스, 뷰 템플릿
+### HTTP 응답
 #### 정적 리소스
 - 웹 브라우저에 HTML, css, js로 제공하는 정적 리소스
 - 정적 리소스는 해당 파일을 변경 없이 그대로 서비스
@@ -228,10 +231,48 @@ public String responseViewV2(Model model) {
 - String 반환: 뷰 리졸버를 실행하여 String 이름의 뷰를 찾고 렌더링
 - void 사용: 요청 URL을 참고하여 동일한 경로의 뷰 이름 실행, 권장X
 
-#### HTTP 메시지
-  - HTTP API 제공하는 경우 HTTP 메시지 바디에 JSON 등의 형식으로 전송
+#### HTTP API, 메시지 바디
+- HTTP API 제공하는 경우 직접 HTTP 메시지 바디에 JSON 등의 형식으로 전송
+- HttpServletResponse
+  - response.getWriter().write("OK")
+- ResponseEntity - String
+  - return new ResponseEntity<>("OK", HttpStatus.OK)
+- @ResponseBody - String 
+  - return "OK"
+- ResponseEntity - JSON
+  - return new ResponseEntity<>(Json, HttpStatus.OK)
+- @ResponseBody - JSON
+  - @ResponseStatus(HttpStatus.OK)
+  - return Json
 
+### HTTP 메시지 컨버터
+- HTTP 요청: @RequestBody, HttpEntity(RequestEntity)
+- HTTP 응답: @ResponseBody, HttpEntity(ResponseEntity)
+- 대상 클래스 타입과 미디어 타입 지원여부 확인 후 사용 반환
 
+#### 스프링 부트 기본 메시지 컨버터
+- 0 = ByteArrayHttpMessageConverter
+  - 클래스 타입: byte[], 미디어타입: */**
+  - 요청 (예) @RequestBody byte[] data
+  - 응답 (예) @ResponseBody return byte[], 미디어 타입 application/octet-stream
+  
+- 1 = StringHttpMessageConverter
+  - 클래스 타입: String, 미디어타입: */**
+  - 요청 (예) @RequestBody String data
+  - 응답 (예) @ResponseBody return "String", 미디어 타입 text/plain
+- 2 = MappingJackson2HttpMessageConverter
+  - 클래스 타입: 객체/HashMap, 미디어타입: application/json 관련
+  - 요청 (예) @RequestBody Json json
+  - 응답 (예) @ResponseBody return Json, 미디어 타입 application/json 관련
+
+### 요청 매핑 핸들러 어댑터 구조![](https://velog.velcdn.com/images/psmin77/post/66583719-a9f8-4412-83eb-851db18083b0/image.png)
+
+#### ArgumentResolver
+- HttpServletRequest, Model, @RequestBody 등 컨트롤러(핸들러)가 필요로 하는 다양한 파라미터의 값을 생성하여 전달
+cf. HttpEntity -> HttpEntityMethodProcessor 사용
+
+#### ReturnValueHandler
+- ArgumentResolver와 유사, @ResponseBody와 같은 응답 값을 변환하고 처리함
 <br>
 
 >
