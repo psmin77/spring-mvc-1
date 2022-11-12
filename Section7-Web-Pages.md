@@ -57,7 +57,7 @@
     <td th:text="${item.price}"> item.price의 값 </td>
     ~~~
   - 속성 - th:value
-  - th:action
+  - 폼 제출 - th:action
     - action 값을 생략하면 현재 URL에 데이터 전송
     - 등록 폼 URL과 실제 등록하는 URL을 동일하게 맞추고 HTTP 메서드로 구분할 수 있음
       - 등록 폼: GET /basic/items/add
